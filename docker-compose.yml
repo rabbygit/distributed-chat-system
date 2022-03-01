@@ -1,0 +1,40 @@
+# version of docker-compose
+version: '3'
+# 'services' are equivalent to 'containers'
+services:
+  socket_1:
+    restart: on-failure
+    build: ./socket_1
+    ports:
+      - "5001:5001"
+    networks:
+      - service_registry_network
+
+  redis_registry:
+    image: 'redis:latest'
+    networks:
+      - service_registry_network
+
+  service_registry_1:
+    restart: on-failure
+    build: ./service_registry_1
+    environment:
+      - redis_host=redis_registry
+    depends_on:
+      - redis_registry
+      - socket_1
+    networks:
+      - service_registry_network
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - service_registry_1
+    networks:
+      - service_registry_network
+
+networks:
+  service_registry_network:
+    driver: bridge
