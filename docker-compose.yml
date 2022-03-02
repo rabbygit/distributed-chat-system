@@ -21,7 +21,7 @@ services:
     restart: on-failure
     build: ./socket/socket_2
     ports:
-      - '5002:5001'
+      - '5002:5002'
     depends_on:
       - redis_socket_1
     networks:
@@ -36,7 +36,7 @@ services:
   redis_registry:
     image: 'redis:latest'
     networks:
-      - service_registry_network
+      - socket_network
 
   service_registry_1:
     restart: on-failure
@@ -45,21 +45,18 @@ services:
       - redis_host=redis_registry
     depends_on:
       - redis_registry
-      - socket_1
     networks:
-      - service_registry_network
+      - socket_network
 
-  nginx:
+  registry_nginx:
     build: ./nginx
     ports:
       - "80:80"
     depends_on:
       - service_registry_1
     networks:
-      - service_registry_network
+      - socket_network
 
 networks:
-  service_registry_network:
-    driver: bridge
   socket_network:
     driver: bridge

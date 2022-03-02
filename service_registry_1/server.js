@@ -11,13 +11,13 @@ const redis = new Redis({
 });
 
 app.use(cors())
+// app.set('trust proxy', true)
 
 app.get('/', async (req, res) => {
   try {
     const host = await redis.zrange("sortedHosts", 0, 0)
 
     if (host) {
-      await redis.zincrby("sortedHosts", 1, host[0])
       return res.json({
         status: true,
         host: host[0]
@@ -66,15 +66,13 @@ app.get('/add_socket', async (req, res) => {
 // user connected
 app.get('/user_connected', async (req, res) => {
   try {
-    const { protocol } = req
-    const { host } = req.headers;
-    const original_host = `${protocol}//${host}`
+    const { host } = req.query
 
-    await redis.zincrby("sortedHosts", 1, original_host)
+    await redis.zincrby("sortedHosts", 1, host)
 
     res.status(200).json({
       status: true,
-      message: `Host connection increased for ${original_host} !`
+      message: `Host connection increased for ${host} !`
     })
   } catch (error) {
     console.log('Some error occured');
@@ -89,15 +87,13 @@ app.get('/user_connected', async (req, res) => {
 // user disconnected
 app.get('/user_disconnected', async (req, res) => {
   try {
-    const { protocol } = req
-    const { host } = req.headers;
-    const original_host = `${protocol}//${host}`
+    const { host } = req.query
 
-    await redis.zincrby("sortedHosts", 1, original_host)
+    await redis.zincrby("sortedHosts", 1, host)
 
     res.status(200).json({
       status: true,
-      message: `Host connection decreased for ${original_host} !`
+      message: `Host connection decreased for ${host} !`
     })
   } catch (error) {
     console.log('Some error occured');

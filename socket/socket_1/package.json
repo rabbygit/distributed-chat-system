@@ -10,10 +10,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "cors": "^2.8.5",
     "@socket.io/redis-adapter": "^7.1.0",
+    "axios": "^0.26.0",
+    "cors": "^2.8.5",
     "express": "^4.17.3",
-    "socket.io": "^4.4.1",
-    "ioredis": "^4.28.5"
+    "ioredis": "^4.28.5",
+    "node-fetch": "^3.2.1",
+    "socket.io": "^4.4.1"
   }
 }
