@@ -1,4 +1,5 @@
 const express = require('express')
+const cors = require('cors')
 const app = express()
 const Redis = require("ioredis")
 const port = 3000
@@ -9,12 +10,23 @@ const redis = new Redis({
   password: 'user123'
 });
 
+app.use(cors())
+
 app.get('/', async (req, res) => {
   try {
     const host = await redis.zrange("sortedHosts", 0, 0)
+
+    if (host) {
+      await redis.zincrby("sortedHosts", 1, host[0])
+      return res.json({
+        status: true,
+        host: host[0]
+      })
+    }
+
     res.json({
-      status: true,
-      host: host[0]
+      success: false,
+      message: 'No host found. please add one!'
     })
   } catch (error) {
     console.log('Some error occured');
@@ -40,6 +52,52 @@ app.get('/add_socket', async (req, res) => {
     res.status(200).json({
       status: true,
       message: 'Host added!'
+    })
+  } catch (error) {
+    console.log('Some error occured');
+    console.log(error)
+    res.status(500).json({
+      status: false,
+      message: 'Internal server error'
+    })
+  }
+})
+
+// user connected
+app.get('/user_connected', async (req, res) => {
+  try {
+    const { protocol } = req
+    const { host } = req.headers;
+    const original_host = `${protocol}//${host}`
+
+    await redis.zincrby("sortedHosts", 1, original_host)
+
+    res.status(200).json({
+      status: true,
+      message: `Host connection increased for ${original_host} !`
+    })
+  } catch (error) {
+    console.log('Some error occured');
+    console.log(error)
+    res.status(500).json({
+      status: false,
+      message: 'Internal server error'
+    })
+  }
+})
+
+// user disconnected
+app.get('/user_disconnected', async (req, res) => {
+  try {
+    const { protocol } = req
+    const { host } = req.headers;
+    const original_host = `${protocol}//${host}`
+
+    await redis.zincrby("sortedHosts", 1, original_host)
+
+    res.status(200).json({
+      status: true,
+      message: `Host connection decreased for ${original_host} !`
     })
   } catch (error) {
     console.log('Some error occured');
