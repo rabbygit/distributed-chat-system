@@ -2,13 +2,36 @@
 version: '3'
 # 'services' are equivalent to 'containers'
 services:
+  redis_socket_1:
+    image: 'redis:latest'
+    networks:
+      - socket_network
+
   socket_1:
     restart: on-failure
-    build: ./socket_1
+    build: ./socket/socket_1
     ports:
-      - "5001:5001"
+      - '5001:5001'
+    depends_on:
+      - redis_socket_1
     networks:
-      - service_registry_network
+      - socket_network
+
+  socket_2:
+    restart: on-failure
+    build: ./socket/socket_2
+    ports:
+      - '5002:5001'
+    depends_on:
+      - redis_socket_1
+    networks:
+      - socket_network
+
+  socket_client:
+    restart: on-failure
+    build: ./socket_client
+    ports:
+      - '3000:3000'
 
   redis_registry:
     image: 'redis:latest'
@@ -37,4 +60,6 @@ services:
 
 networks:
   service_registry_network:
+    driver: bridge
+  socket_network:
     driver: bridge
