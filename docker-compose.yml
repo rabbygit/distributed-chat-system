@@ -1,57 +1,111 @@
 # version of docker-compose
 version: '3'
-# 'services' are equivalent to 'containers'
+
+# list of serices and their configuration
 services:
-  redis_socket_1:
-    image: 'redis:latest'
+  # redis master node
+  redis:
+    image: 'bitnami/redis:latest'
+    environment:
+      - REDIS_REPLICATION_MODE=master # declare as master
+      - ALLOW_EMPTY_PASSWORD=yes # not recomended on production
+    networks:
+      - socket_network
+    ports:
+      - '6379'
+
+  # redis slave 1 
+  redis-slave-1:
+    image: 'bitnami/redis:latest'
+    environment:
+      - REDIS_REPLICATION_MODE=slave # declare as slave
+      - REDIS_MASTER_HOST=redis
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - '6379'
+    depends_on:
+      - redis
     networks:
       - socket_network
 
+  # redis slave 2  
+  redis-slave-2:
+    image: 'bitnami/redis:latest'
+    environment:
+      - REDIS_REPLICATION_MODE=slave # declare as slave
+      - REDIS_MASTER_HOST=redis
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - '6379'
+    depends_on:
+      - redis
+    networks:
+      - socket_network
+
+  # 3 redis sentinel    
+  redis-sentinel:
+    image: 'bitnami/redis-sentinel:latest'
+    environment:
+      - REDIS_MASTER_HOST=redis
+      - REDIS_MASTER_SET=mymaster # redis instances identification
+    depends_on:
+      - redis
+      - redis-slave-1
+      - redis-slave-2
+    ports:
+      - '26379-26381:26379' # 3 port will be occupied when we scale 3 sentinel process
+    networks:
+      - socket_network
+
+  # socket server 1
   socket_1:
     restart: on-failure
     build: ./socket/socket_1
     ports:
       - '5001:5001'
+    environment:
+      - redis_host=redis-sentinel
     depends_on:
-      - redis_socket_1
+      - redis-sentinel
     networks:
       - socket_network
 
+  # socket server 2
   socket_2:
     restart: on-failure
     build: ./socket/socket_2
     ports:
       - '5002:5002'
+    environment:
+      - redis_host=redis-sentinel
     depends_on:
-      - redis_socket_1
+      - redis-sentinel
     networks:
       - socket_network
 
+  # client server
   socket_client:
     restart: on-failure
     build: ./socket_client
     ports:
       - '3000:3000'
 
-  redis_registry:
-    image: 'redis:latest'
-    networks:
-      - socket_network
-
+  # service registry
   service_registry_1:
     restart: on-failure
     build: ./service_registry_1
     environment:
-      - redis_host=redis_registry
+      - redis_host=redis-sentinel
     depends_on:
-      - redis_registry
+      - redis-sentinel
     networks:
       - socket_network
 
+  # nginx for multiple service registry
   registry_nginx:
     build: ./nginx
     ports:
-      - "80:80"
+      - '80:80'
     depends_on:
       - service_registry_1
     networks:

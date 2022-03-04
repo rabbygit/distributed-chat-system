@@ -4,14 +4,17 @@ const app = express()
 const Redis = require("ioredis")
 const port = 3000
 
-const redis = new Redis({
-  port: 6379, // Redis port
-  host: process.env.redis_host, // Redis host
-  password: 'user123'
-});
-
 app.use(cors())
-// app.set('trust proxy', true)
+
+// connect to redis cluster through redis sentinel
+const redis = new Redis({
+  sentinels: [
+    { host: process.env.redis_host, port: 26379 },
+    { host: process.env.redis_host, port: 26380 },
+    { host: process.env.redis_host, port: 26381 },
+  ],
+  name: "mymaster",
+});
 
 app.get('/', async (req, res) => {
   try {
@@ -63,6 +66,7 @@ app.get('/add_socket', async (req, res) => {
   }
 })
 
+
 // user connected
 app.get('/user_connected', async (req, res) => {
   try {
@@ -89,7 +93,7 @@ app.get('/user_disconnected', async (req, res) => {
   try {
     const { host } = req.query
 
-    await redis.zincrby("sortedHosts", 1, host)
+    await redis.zincrby("sortedHosts", -1, host)
 
     res.status(200).json({
       status: true,

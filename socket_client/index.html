@@ -76,10 +76,9 @@
     fetch('http://localhost:80')
       .then(response => response.json())
       .then(data => {
-        console.log(data)
         if (data.host) {
           socket = io(data.host);
-
+          // listening to 'chat message' event from server
           socket.on('chat message', function (msg) {
             var item = document.createElement('li');
             item.textContent = msg;
@@ -98,6 +97,7 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       if (input.value) {
+        // emit message to 'chat message' event to server
         socket.emit('chat message', input.value);
         input.value = '';
       }
