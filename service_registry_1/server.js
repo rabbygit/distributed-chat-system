@@ -3,6 +3,7 @@ const cors = require('cors')
 const app = express()
 const Redis = require("ioredis")
 const port = 3000
+const MAX_CONNECTION = process.env.max_connection || 1000;
 
 app.use(cors())
 
@@ -16,18 +17,27 @@ const redis = new Redis({
   name: "mymaster",
 });
 
+// get a socket server address which has less connection
 app.get('/', async (req, res) => {
   try {
-    const host = await redis.zrange("sortedHosts", 0, 0)
+    const host = await redis.zrange("sortedHosts", 0, 0, 'WITHSCORES')
 
+    // host => ['host_address','199']
     if (host) {
-      return res.json({
-        status: true,
-        host: host[0]
-      })
+      if (Number(host[1]) < MAX_CONNECTION) {
+        return res.json({
+          status: true,
+          host: host[0]
+        })
+      } else {
+        return res.status(202).json({
+          staus: false,
+          message: 'Try again'
+        })
+      }
     }
 
-    res.json({
+    res.status(404).json({
       success: false,
       message: 'No host found. please add one!'
     })
