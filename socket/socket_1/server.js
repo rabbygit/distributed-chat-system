@@ -31,10 +31,9 @@ io.adapter(createAdapter(pubClient, subClient));
 
 io.on('connection', async(socket) => {
   try {
-    // notify the registry service that one connection is established
+    // increase host connection count
     console.log('a user connected');
-    const response = await axios.get('http://registry_nginx:80/user_connected?host=http://127.0.0.1:5001');
-    console.log(response);
+    await pubClient.zincrby("sortedHosts", 1, 'http://127.0.0.1:5001')
   } catch (error) {
     console.log(error);
   }
@@ -44,11 +43,10 @@ io.on('connection', async(socket) => {
   });
 
   socket.on("disconnect", async() => {
-    // notify the registry service that one connection is lost
+    // decrease host connection count
     try {
       console.log('a user disconnected');
-      const response = await axios.get('http://registry_nginx:80/user_disconnected?host=http://127.0.0.1:5001');
-      console.log(response);
+      await pubClient.zincrby("sortedHosts", -1, 'http://127.0.0.1:5001')
     } catch (error) {
       console.log(error);
     }

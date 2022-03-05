@@ -66,49 +66,6 @@ app.get('/add_socket', async (req, res) => {
   }
 })
 
-
-// user connected
-app.get('/user_connected', async (req, res) => {
-  try {
-    const { host } = req.query
-
-    await redis.zincrby("sortedHosts", 1, host)
-
-    res.status(200).json({
-      status: true,
-      message: `Host connection increased for ${host} !`
-    })
-  } catch (error) {
-    console.log('Some error occured');
-    console.log(error)
-    res.status(500).json({
-      status: false,
-      message: 'Internal server error'
-    })
-  }
-})
-
-// user disconnected
-app.get('/user_disconnected', async (req, res) => {
-  try {
-    const { host } = req.query
-
-    await redis.zincrby("sortedHosts", -1, host)
-
-    res.status(200).json({
-      status: true,
-      message: `Host connection decreased for ${host} !`
-    })
-  } catch (error) {
-    console.log('Some error occured');
-    console.log(error)
-    res.status(500).json({
-      status: false,
-      message: 'Internal server error'
-    })
-  }
-})
-
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
