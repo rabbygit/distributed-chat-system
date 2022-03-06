@@ -237,6 +237,7 @@ docker-compose up --scale redis-sentinel=3
 Now, we need to add socket server address to the service registry.To add, open your browser and hit this url:
 
 > http://localhost/add_socket/?host=http://127.0.0.1:5001
+
 > http://localhost/add_socket/?host=http://127.0.0.1:5002
 
 It will add two socket servers to the registry.
