@@ -111,6 +111,20 @@ services:
     networks:
       - socket_network
 
+  # health_checker service
+  health_checker:
+    restart: on-failure
+    build: ./health_checker
+    environment:
+      - redis_host=redis-sentinel
+      - interval=1 # in every 1 minute, it will check all socket servers
+    depends_on:
+      - redis-sentinel
+    ports:
+      - 8000:8000
+    networks:
+      - socket_network
+
 networks:
   socket_network:
     driver: bridge

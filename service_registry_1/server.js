@@ -22,6 +22,8 @@ app.get('/', async (req, res) => {
   try {
     const host = await redis.zrange("sortedHosts", 0, 0, 'WITHSCORES')
 
+    console.log(host);
+
     // host => ['host_address','199']
     if (host) {
       if (Number(host[1]) < MAX_CONNECTION) {

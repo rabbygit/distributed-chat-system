@@ -29,7 +29,7 @@ const subClient = pubClient.duplicate();
 // socket io adapter, it manages the massages among different socket nodes through redis
 io.adapter(createAdapter(pubClient, subClient));
 
-io.on('connection', async(socket) => {
+io.on('connection', async (socket) => {
   try {
     // increase host connection count
     console.log('a user connected');
@@ -37,12 +37,12 @@ io.on('connection', async(socket) => {
   } catch (error) {
     console.log(error);
   }
-  
+
   socket.on('chat message', (msg) => {
     io.emit('chat message', msg);
   });
 
-  socket.on("disconnect", async() => {
+  socket.on("disconnect", async () => {
     // decrease host connection count
     try {
       console.log('a user disconnected');
@@ -52,6 +52,7 @@ io.on('connection', async(socket) => {
     }
   });
 });
+
 // allow cors policy
 app.use(cors())
 
