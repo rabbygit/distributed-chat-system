@@ -22,8 +22,6 @@ app.get('/', async (req, res) => {
   try {
     const host = await redis.zrange("sortedHosts", 0, 0, 'WITHSCORES')
 
-    console.log(host);
-
     // host => ['host_address','199']
     if (host) {
       if (Number(host[1]) < MAX_CONNECTION) {
@@ -66,7 +64,7 @@ app.get('/add_socket', async (req, res) => {
 
     res.status(200).json({
       status: true,
-      message: 'Host added!'
+      message: 'Host added by service_registry_1!'
     })
   } catch (error) {
     console.log('Some error occured');
@@ -79,5 +77,5 @@ app.get('/add_socket', async (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Service_registry_1 is listening on port ${port}`)
 })

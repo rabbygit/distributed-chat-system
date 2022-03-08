@@ -90,10 +90,21 @@ services:
     ports:
       - '3000:3000'
 
-  # service registry
+  # service registry 1
   service_registry_1:
     restart: on-failure
-    build: ./service_registry_1
+    build: ./service_registry/service_registry_1
+    environment:
+      - redis_host=redis-sentinel
+    depends_on:
+      - redis-sentinel
+    networks:
+      - socket_network
+
+  # service registry 2
+  service_registry_2:
+    restart: on-failure
+    build: ./service_registry/service_registry_2
     environment:
       - redis_host=redis-sentinel
     depends_on:
@@ -108,6 +119,7 @@ services:
       - '80:80'
     depends_on:
       - service_registry_1
+      - service_registry_2
     networks:
       - socket_network
 

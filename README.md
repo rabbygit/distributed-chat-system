@@ -248,13 +248,22 @@ If you closely look the network tab, you should see that socket connection is es
 
 ![conenction test](./assets/s_connection_2.png)
 
-Now, if you open another tab and follow the previous step, you should now connect with http://127.0.0.1:5002
+Now, open another tab and follow the previous step, you should now connect with http://127.0.0.1:5002
 
 ![conenction test](./assets/s_connection_3.png)
 
 You can also send message through socket
 
 ![message test](./assets/message.png)
+
+## Check redis automatic failover
+To check redis failover, you can stop one of the redis services by running this command:
+
+
+```
+docker-compose stop redis
+``` 
+It will stop the master Redis node but our application will still work smoothly because one of the slave Redis nodes will be promoted as master.
 
 ## Tech stack used in this project
 - Node.js
