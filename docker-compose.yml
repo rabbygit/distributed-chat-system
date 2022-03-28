@@ -114,7 +114,7 @@ services:
 
   # nginx for multiple service registry
   registry_nginx:
-    build: ./nginx
+    build: ./registry_nginx
     ports:
       - '80:80'
     depends_on:
