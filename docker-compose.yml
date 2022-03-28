@@ -137,6 +137,43 @@ services:
     networks:
       - socket_network
 
+  # mysql db
+  user_service_mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: chat_users
+    volumes:
+      - ./user_service/data:/var/lib/mysql
+    ports:
+      - 3306:3306
+    networks:
+      - socket_network 
+
+  # user service 1
+  user_service_1:
+    restart: on-failure
+    build: ./user_service/user_service_1
+    environment:
+      - dbName=chat_users
+      - username=root
+      - password=password 
+      - host=user_service_mysql
+    depends_on:
+      - user_service_mysql
+    networks:
+      - socket_network
+
+  # nginx for multiple service user service
+  user_nginx:
+    build: ./user_nginx
+    ports:
+      - '81:80'
+    depends_on:
+      - user_service_1
+    networks:
+      - socket_network
+
 networks:
   socket_network:
     driver: bridge

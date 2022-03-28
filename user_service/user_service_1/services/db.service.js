@@ -5,8 +5,10 @@
 // Dependencies
 const Sequelize = require("sequelize");
 
-const sequelize = new Sequelize('chat_users', '', '', {
-  host: 'localhost',
+const { dbName, username, password, host } = process.env;
+
+const sequelize = new Sequelize(dbName, username, password, {
+  host,
   dialect: 'mysql',
 
   query: {

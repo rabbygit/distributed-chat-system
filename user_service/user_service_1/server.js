@@ -5,17 +5,7 @@ const db = require('./services/db.service')
 const port = 3000
 
 app.use(cors())
-
-// get a socket server address which has less connection
-app.get('/', async (req, res) => {
-  try {
-    res.status(404).json({
-      success: false,
-      message: 'No host found. please add one!'
-    })
-  } catch (error) {
-  }
-})
+app.use(express.json());
 
 // user signup
 app.post('/sign_up', async (req, res) => {
@@ -37,7 +27,7 @@ app.post('/sign_up', async (req, res) => {
       }
     })
 
-    if (!user) {
+    if (user) {
       return res.status(409).json({
         status: false,
         message: 'user already exists with this username. Try with another one!'
@@ -45,7 +35,7 @@ app.post('/sign_up', async (req, res) => {
     }
 
     // insert into db
-    await db.users.insert({
+    await db.users.create({
       username,
       password // you should never keep password in plain text in production
     })
@@ -105,6 +95,18 @@ app.post('/login', async (req, res) => {
   }
 })
 
-app.listen(port, () => {
-  console.log(`user_service_1 is listening on port ${port}`)
-})
+// db connection
+db.sequelize
+  .sync({
+    logging: false,
+    alter: true,
+  })
+  .then(() => {
+    console.log("Database connection established successfully");
+
+    // Start server
+    app.listen(port, () => {
+      console.log(`user_service_1 is listening on port ${port}`)
+    })
+  })
+  .catch((error) => console.error(error));
