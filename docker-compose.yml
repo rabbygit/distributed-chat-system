@@ -84,11 +84,11 @@ services:
       - socket_network
 
   # client server
-  socket_client:
-    restart: on-failure
-    build: ./socket_client
-    ports:
-      - '3000:3000'
+  # socket_client:
+  #   restart: on-failure
+  #   build: ./socket_client
+  #   ports:
+  #     - '3000:3000'
 
   # service registry 1
   service_registry_1:
@@ -148,7 +148,7 @@ services:
     ports:
       - 3306:3306
     networks:
-      - socket_network 
+      - socket_network
 
   # user service 1
   user_service_1:
@@ -157,7 +157,7 @@ services:
     environment:
       - dbName=chat_users
       - username=root
-      - password=password 
+      - password=password
       - host=user_service_mysql
     depends_on:
       - user_service_mysql
@@ -173,6 +173,11 @@ services:
       - user_service_1
     networks:
       - socket_network
+  socket_client:
+    restart: on-failure
+    build: ./socket_client
+    ports:
+      - '3000:8080'
 
 networks:
   socket_network:

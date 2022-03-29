@@ -10,24 +10,25 @@ app.use(express.json());
 // user signup
 app.post('/sign_up', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username } = req.body;
 
     // validation logic
-    if (!username || !password) {
+    if (!username) {
       return res.status(400).json({
         status: false,
-        message: 'username and password required'
+        message: 'username required'
       })
     }
 
     // find user with this username
-    const user = await db.users.findOne({
+    const found_user = await db.users.findOne({
+      attributes: ['id'],
       where: {
         username,
       }
     })
 
-    if (user) {
+    if (found_user) {
       return res.status(409).json({
         status: false,
         message: 'user already exists with this username. Try with another one!'
@@ -35,56 +36,39 @@ app.post('/sign_up', async (req, res) => {
     }
 
     // insert into db
-    await db.users.create({
+    const user = await db.users.create({
       username,
-      password // you should never keep password in plain text in production
     })
 
     // response
     res.status(200).json({
       status: true,
-      message: 'user signup successfully'
-    })
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({
-      status: true,
-      message: 'Internal server error'
-    })
-  }
-})
-
-// user login
-app.post('/login', async (req, res) => {
-  try {
-    const { username, password } = req.body;
-
-    // validation logic
-    if (!username || !password) {
-      return res.status(400).json({
-        status: false,
-        message: 'username and password required'
-      })
-    }
-
-    // find user with this username
-    const user = await db.users.findOne({
-      where: {
-        username,
-        password
+      message: 'user signup successfully',
+      user: {
+        id: user.id,
+        username: username
       }
     })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({
+      status: true,
+      message: 'Internal server error'
+    })
+  }
+})
 
-    if (!user) {
-      return res.status(404).json({
-        status: false,
-        message: 'user not found'
-      })
-    }
+app.get('/users', async (req, res) => {
+  try {
+    const users = await db.users.findAll({
+      attributes: ['id', 'username']
+    })
 
+    // response
     res.status(200).json({
       status: true,
-      user
+      message: 'user signup successfully',
+      users
     })
   } catch (error) {
     console.error(error)
@@ -94,6 +78,7 @@ app.post('/login', async (req, res) => {
     })
   }
 })
+
 
 // db connection
 db.sequelize

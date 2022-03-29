@@ -12,11 +12,6 @@ module.exports = (sequelize, types) => {
         type: types.STRING(30),
         allowNull: false,
       },
-
-      password: {
-        type: types.STRING(30),
-        allowNull: false,
-      },
     },
     {
       charset: 'utf8',
