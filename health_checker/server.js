@@ -30,11 +30,12 @@ const checker = async (host) => {
     console.log(`${host} is alive`)
   } catch (error) {
     // update redis store
+    // or retry logic
     console.log(`Unable to reach the server ${host}`)
     console.log(error)
     await redis.zrem("sortedHosts", host)
 
-    // maybe email adminstator
+    // maybe send email adminstator 
   }
 }
 

@@ -6,6 +6,7 @@ services:
   # redis master node
   redis:
     image: 'bitnami/redis:latest'
+    container_name: d_redis
     environment:
       - REDIS_REPLICATION_MODE=master # declare as master
       - ALLOW_EMPTY_PASSWORD=yes # not recomended on production
@@ -17,6 +18,7 @@ services:
   # redis slave 1 
   redis-slave-1:
     image: 'bitnami/redis:latest'
+    container_name: d_redis-slave-1
     environment:
       - REDIS_REPLICATION_MODE=slave # declare as slave
       - REDIS_MASTER_HOST=redis
@@ -31,6 +33,7 @@ services:
   # redis slave 2  
   redis-slave-2:
     image: 'bitnami/redis:latest'
+    container_name: d_redis-slave-2
     environment:
       - REDIS_REPLICATION_MODE=slave # declare as slave
       - REDIS_MASTER_HOST=redis
@@ -61,6 +64,7 @@ services:
   socket_1:
     restart: on-failure
     build: ./socket/socket_1
+    container_name: d_socket_1
     ports:
       - '5001:5001'
     environment:
@@ -84,16 +88,17 @@ services:
       - socket_network
 
   # client server
-  # socket_client:
-  #   restart: on-failure
-  #   build: ./socket_client
-  #   ports:
-  #     - '3000:3000'
+  socket_client:
+    restart: on-failure
+    build: ./socket_client
+    ports:
+      - '3000:8080'
 
   # service registry 1
   service_registry_1:
     restart: on-failure
     build: ./service_registry/service_registry_1
+    container_name: d_service_registry_1
     environment:
       - redis_host=redis-sentinel
     depends_on:
@@ -105,6 +110,7 @@ services:
   service_registry_2:
     restart: on-failure
     build: ./service_registry/service_registry_2
+    container_name: d_service_registry_2
     environment:
       - redis_host=redis-sentinel
     depends_on:
@@ -115,6 +121,7 @@ services:
   # nginx for multiple service registry
   registry_nginx:
     build: ./registry_nginx
+    container_name: d_registry_nginx
     ports:
       - '80:80'
     depends_on:
@@ -127,9 +134,10 @@ services:
   health_checker:
     restart: on-failure
     build: ./health_checker
+    container_name: d_health_checker
     environment:
       - redis_host=redis-sentinel
-      - interval=1 # in every 1 minute, it will check all socket servers
+      - interval=50 # in every 1 minute, it will check all socket servers
     depends_on:
       - redis-sentinel
     ports:
@@ -140,13 +148,12 @@ services:
   # mysql db
   user_service_mysql:
     image: mysql:5.7
+    container_name: d_user_service_mysql
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: chat_users
     volumes:
       - ./user_service/data:/var/lib/mysql
-    ports:
-      - 3306:3306
     networks:
       - socket_network
 
@@ -154,6 +161,7 @@ services:
   user_service_1:
     restart: on-failure
     build: ./user_service/user_service_1
+    container_name: d_user_service_1
     environment:
       - dbName=chat_users
       - username=root
@@ -167,17 +175,13 @@ services:
   # nginx for multiple service user service
   user_nginx:
     build: ./user_nginx
+    container_name: d_user_nginx
     ports:
       - '81:80'
     depends_on:
       - user_service_1
     networks:
       - socket_network
-  socket_client:
-    restart: on-failure
-    build: ./socket_client
-    ports:
-      - '3000:8080'
 
 networks:
   socket_network:

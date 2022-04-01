@@ -88,10 +88,11 @@ db.sequelize
   })
   .then(() => {
     console.log("Database connection established successfully");
-
-    // Start server
-    app.listen(port, () => {
-      console.log(`user_service_1 is listening on port ${port}`)
-    })
   })
   .catch((error) => console.error(error));
+
+
+// Start server
+app.listen(port, () => {
+  console.log(`user_service_1 is listening on port ${port}`)
+})

@@ -1,20 +1,23 @@
 <template>
   <div>
-    <div class="left-panel">
-      <user
-        v-for="user in users"
-        :key="user.id"
-        :user="user"
-        :selected="selectedUser === user"
-        @select="onSelectUser(user)"
+    <div>
+      <div class="left-panel">
+        <router-link to="/group">Group Chat</router-link>
+        <user
+          v-for="user in users"
+          :key="user.id"
+          :user="user"
+          :selected="selectedUser === user"
+          @select="onSelectUser(user)"
+        />
+      </div>
+      <message-panel
+        v-if="selectedUser"
+        :user="selectedUser"
+        @input="onMessage"
+        class="right-panel"
       />
     </div>
-    <message-panel
-      v-if="selectedUser"
-      :user="selectedUser"
-      @input="onMessage"
-      class="right-panel"
-    />
   </div>
 </template>
 
@@ -26,7 +29,10 @@ import makeApiCall from "../api_service";
 
 export default {
   name: "Chat",
-  components: { User, MessagePanel },
+  components: {
+    User,
+    MessagePanel,
+  },
   data() {
     return {
       selectedUser: null,
@@ -39,7 +45,7 @@ export default {
       if (this.selectedUser) {
         socket.emit("private message", {
           content,
-          to: this.selectedUser.userID,
+          to: this.selectedUser.id,
         });
         this.selectedUser.messages.push({
           content,
@@ -47,7 +53,9 @@ export default {
         });
       }
     },
+
     onSelectUser(user) {
+      console.log("user selected", user);
       this.selectedUser = user;
       user.hasNewMessages = false;
     },
@@ -84,6 +92,7 @@ export default {
 
   created() {
     this.getUsers();
+
     socket.on("connect", () => {
       this.users.forEach((user) => {
         if (user.self) {
@@ -108,7 +117,7 @@ export default {
     socket.on("user disconnected", (id) => {
       for (let i = 0; i < this.users.length; i++) {
         const user = this.users[i];
-        if (user.userID === id) {
+        if (user.id === id) {
           user.connected = false;
           break;
         }
@@ -118,7 +127,7 @@ export default {
     socket.on("private message", ({ content, from }) => {
       for (let i = 0; i < this.users.length; i++) {
         const user = this.users[i];
-        if (user.userID === from) {
+        if (user.id === from) {
           user.messages.push({
             content,
             fromSelf: false,

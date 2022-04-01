@@ -1,0 +1,16 @@
+declare const express: any;
+declare const cors: any;
+declare const http: any;
+declare const axios: any;
+declare const app: any;
+declare const server: any;
+declare const Server: any;
+declare const createAdapter: any;
+declare const Redis: any;
+declare const io: any;
+declare const pubClient: any;
+declare const subClient: any;
+declare const notify_new_connection: () => Promise<void>;
+declare const notify_disconnect: () => Promise<void>;
+declare const add_to_groupchat: (groupKey: any, user_id: any) => Promise<void>;
+declare const getChatMembersOfGroupChat: (groupKey: any) => Promise<any>;

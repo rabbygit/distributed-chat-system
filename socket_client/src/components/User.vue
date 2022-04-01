@@ -4,19 +4,19 @@
       <div class="name">
         {{ user.username }} {{ user.self ? " (yourself)" : "" }}
       </div>
-      <div class="status">
+      <!-- <div class="status">
         <status-icon :connected="user.connected" />{{ status }}
-      </div>
+      </div> -->
     </div>
     <div v-if="user.hasNewMessages" class="new-messages">!</div>
   </div>
 </template>
 
 <script>
-import StatusIcon from "./StatusIcon";
+// import StatusIcon from "./StatusIcon";
 export default {
   name: "User",
-  components: { StatusIcon },
+  // components: { StatusIcon },
   props: {
     user: Object,
     selected: Boolean,
